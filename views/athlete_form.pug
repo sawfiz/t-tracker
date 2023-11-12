@@ -1,0 +1,30 @@
+extends layout
+
+block content
+  h1= title
+
+  form(action='' method="POST")
+    div.form-group
+      label(for='first_name') First Name:
+      input.form-control(type='text' id='first_name' name='first_name'
+        required='true'
+        placeholder='John'
+        value=(athlete === undefined ? '' : athlete.first_name))
+
+      label(for='last_name') Last Name:
+      input.form-control(type='text' id='last_name' name='last_name'
+        required='true'
+        placeholder='Smith'
+        value=(athlete === undefined ? '' : athlete.last_name))
+
+    .form-group
+      label(for='date_of_birth') Date of birth:
+      input.form-control(type='date' id='date_of_birth' name='date_of_birth'
+        value=(athlete === undefined ? '' : athlete.date_of_birth))
+
+    button.btn.btn-primary(type='sumbit') Submit
+
+  if errors
+    ul
+      each error in errors
+        li.text-danger!= error.msg

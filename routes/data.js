@@ -17,4 +17,7 @@ router.post("/athlete/create", athlete_controller.athlete_create_post);
 // GET request for one athlete.
 router.get("/athlete/:id", athlete_controller.athlete_detail);
 
+// GET request for list of all athletes
+router.get("/athletes", athlete_controller.athlete_list);
+
 module.exports = router;

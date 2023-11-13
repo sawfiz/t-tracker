@@ -3,6 +3,12 @@ const asyncHandler = require('express-async-handler');
 const validateObjectId = require('../middleware/validateObjectId');
 const { body, validationResult } = require('express-validator');
 
+// Display list of all athletes.
+exports.athlete_list = asyncHandler(async (req, res, next) => {
+  const athlete_list = await Athlete.find().sort({ family_name: 1 }).exec();
+  res.render('athlete_list', { title: 'athlete List', athlete_list });
+});
+
 // Display detail page for a specific athlete.
 exports.athlete_detail = [
   validateObjectId,
@@ -42,14 +48,41 @@ exports.athlete_create_post = [
     .withMessage('Last name must be specified')
     .isAlphanumeric()
     .withMessage('First name has non-alphanumeric charecters'),
-  body('date_of_birth', 'Invalid date of birth').isISO8601().toDate(),
+  body('birthdate', 'Invalid date of birth').isISO8601().toDate(),
+
+  // Validate and sanitize the 'mobile' field
+  body('mobile')
+    .optional({ nullable: true, checkFalsy: true })
+    .matches(/^\d{8}$/)
+    .withMessage('Mobile number must be exactly 8 digits')
+    .trim()
+    .escape(),
+
+  // Validate and sanitize the 'email' field
+  body('email')
+    .optional({ nullable: true, checkFalsy: true })
+    .isEmail()
+    .withMessage('Invalid email address')
+    .normalizeEmail(),
+
+  // Validate and sanitize the 'school' field
+  body('school')
+    .optional({ nullable: true, checkFalsy: true })
+    .isLength({ min: 2 })
+    .withMessage('School name must be at least 2 characters')
+    .trim()
+    .escape(),
 
   asyncHandler(async (req, res, next) => {
     const errors = validationResult(req);
     const athlete = new Athlete({
       first_name: req.body.first_name,
       last_name: req.body.last_name,
-      date_of_birth: req.body.date_of_birth,
+      gender: req.body.gender,
+      birthdate: req.body.birthdate,
+      mobile: req.body.mobile,
+      email: req.body.email,
+      school: req.body.school,
     });
 
     if (!errors.isEmpty()) {

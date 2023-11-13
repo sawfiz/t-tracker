@@ -6,7 +6,8 @@ const Schema = mongoose.Schema;
 const schema = new Schema({
   first_name: { type: String, require: true, maxlength: 20 },
   last_name: { type: String, require: true, maxlength: 20 },
-  birth_date: { type: Date },
+  gender: {type: String, enum:['male', 'female']},
+  birthdate: { type: Date },
   mobile: { type: String, maxlentgh: 15 },
   email: { type: String, maxlength: 50 },
   school: { type: String, maxlength: 50 },
@@ -24,6 +25,12 @@ schema.virtual('name').get(function () {
   }
   return fullname;
 });
+
+// Virtual for birthdate in YYYY-MM-DD format
+schema.virtual("birthdate_yyyy_mm_dd").get(function () {
+  return DateTime.fromJSDate(this.birthdate).toISODate(); // format 'YYYY-MM-DD'
+});
+
 
 schema.virtual('url').get(function () {
   return `/data/athlete/${this._id}`;

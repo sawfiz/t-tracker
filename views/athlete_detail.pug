@@ -3,6 +3,21 @@ extends layout
 block content
   h1 Athlete: #{athlete.name}
 
+  p #[strong First Name: ] #{athlete.first_name}
+  p #[strong Last Name: ] #{athlete.last_name}
+  p #[strong Gender: ] #{athlete.gender}
+  p #[strong Date of birth: ] #{athlete.birthdate_yyyy_mm_dd}
+  p #[strong Mobile: ] #{athlete.mobile}
+  p #[strong Email: ] #{athlete.email}
+  p #[strong School: ] #{athlete.school}
+  hr
+  p #[strong Time trials: ]
+  p
+    a(href='') Add a time trial
+  hr
+  p #[strong Notes: ] #{athlete.school}
+  p
+    a(href='') Add a note
   hr
   p
     a(href=athlete.url+'/delete') Delete athlete

@@ -7,20 +7,41 @@ block content
     div.form-group
       label(for='first_name') First Name:
       input.form-control(type='text' id='first_name' name='first_name'
-        required='true'
+        required
         placeholder='John'
         value=(athlete === undefined ? '' : athlete.first_name))
 
       label(for='last_name') Last Name:
       input.form-control(type='text' id='last_name' name='last_name'
-        required='true'
+        required
         placeholder='Smith'
         value=(athlete === undefined ? '' : athlete.last_name))
 
-    .form-group
-      label(for='date_of_birth') Date of birth:
-      input.form-control(type='date' id='date_of_birth' name='date_of_birth'
-        value=(athlete === undefined ? '' : athlete.date_of_birth))
+      label(for='gender') Gender:
+      select.form-control(type='select' id='gender' name='gender' required)
+        option(value="") -
+        option(value="male" selected=(athlete && athlete.gender === 'male' ? 'selected' : false)) Male
+        option(value="female" selected=(athlete && athlete.gender === 'female' ? 'selected' : false)) Female
+
+      label(for='birthdate') Date of birth:
+      input.form-control(type='date' id='birthdate' name='birthdate' required
+        value=(athlete === undefined ? '' : athlete.birthdate_yyyy_mm_dd))
+
+      label(for='mobile') Mobile:
+      input.form-control(type='text' id='mobile' name='mobile'
+        placeholder='88888888'
+        value=(athlete === undefined ? '' : athlete.mobile))
+
+      label(for='email') Email:
+      input.form-control(type='text' id='email' name='email'
+        placeholder='john.smith@abc.com'
+        value=(athlete === undefined ? '' : athlete.email))
+
+      label(for='school') School:
+      input.form-control(type='text' id='school' name='school'
+        placeholder='ABC Primary School'
+        value=(athlete === undefined ? '' : athlete.school))
+
 
     button.btn.btn-primary(type='sumbit') Submit
 

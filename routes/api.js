@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 
-const athlete_controller = require('../controllers/athleteApiController')
+const athlete_api_controller = require('../controllers/athleteApiController')
 
 /* GET data home page. */
 router.get('/', function (req, res, next) {
@@ -10,10 +10,10 @@ router.get('/', function (req, res, next) {
 
 /* Athlete requests */
 // GET request for creating an athlete
-// router.get('/athlete/create', athlete_controller.athlete_create_get)
+// router.get('/athlete/create', athlete_api_controller.athlete_create_get)
 
 // POST request for creating athlete.
-// router.post("/athlete/create", athlete_controller.athlete_create_post);
+router.post("/athlete/create", athlete_api_controller.athlete_create_post);
 
 // // GET request to delete athlete.
 // router.get("/athlete/:id/delete", athlete_controller.athlete_delete_get);
@@ -28,10 +28,10 @@ router.get('/', function (req, res, next) {
 // router.post("/athlete/:id/update", athlete_controller.athlete_update_post);
 
 // GET request for one athlete.
-router.get("/athlete/:id", athlete_controller.athlete_detail);
+router.get("/athlete/:id", athlete_api_controller.athlete_detail);
 
 // GET request for list of all athletes
-router.get("/athletes", athlete_controller.athlete_list);
+router.get("/athletes", athlete_api_controller.athlete_list);
 
 /* Parents requests */
 

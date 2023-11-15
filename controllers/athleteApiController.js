@@ -34,6 +34,10 @@ exports.athlete_create_get = (req, res, next) => {
 
 // Handle athlete create on POST.
 exports.athlete_create_post = [
+  (req, res, next) => {
+    console.log('POST received');
+    next();
+  },
   body('first_name')
     .trim()
     .isLength({ min: 1 })
@@ -72,9 +76,15 @@ exports.athlete_create_post = [
     .withMessage('School name must be at least 2 characters')
     .trim()
     .escape(),
+  (req, res, next) => {
+    console.log('Went through validations');
+    next();
+  },
 
   asyncHandler(async (req, res, next) => {
     const errors = validationResult(req);
+    console.log("🚀 ~ file: athleteApiController.js:86 ~ asyncHandler ~ errors:", errors)
+
     const athlete = new Athlete({
       first_name: req.body.first_name,
       last_name: req.body.last_name,
@@ -86,14 +96,15 @@ exports.athlete_create_post = [
     });
 
     if (!errors.isEmpty()) {
-      res.render('athlete_form', {
-        title: 'Create Athlete',
-        athlete,
-        errors: errors.array(),
-      });
+      // res.render('athlete_form', {
+      //   title: 'Create Athlete',
+      //   athlete,
+      //   errors: errors.array(),
+      // });
+      res.json({ errors });
     } else {
       await athlete.save();
-      res.redirect(athlete.url);
+      res.status(201).json({message: "Success"})
     }
   }),
 ];

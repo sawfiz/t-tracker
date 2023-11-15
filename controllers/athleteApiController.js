@@ -6,7 +6,7 @@ const { body, validationResult } = require('express-validator');
 // Display list of all athletes.
 exports.athlete_list = asyncHandler(async (req, res, next) => {
   const athlete_list = await Athlete.find().sort({ family_name: 1 }).exec();
-  res.render('athlete_list', { title: 'athlete List', athlete_list });
+  res.json({ athlete_list });
 });
 
 // Display detail page for a specific athlete.
@@ -23,7 +23,7 @@ exports.athlete_detail = [
       next(err);
     }
 
-    res.render('athlete_detail', { athlete });
+    res.json({ athlete });
   }),
 ];
 

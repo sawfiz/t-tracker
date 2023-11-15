@@ -8,7 +8,6 @@ const schema = new Schema({
   last_name: { type: String, require: true, maxlength: 20 },
   mobile: { type: String, required: true, maxlentgh: 15 },
   email: { type: String, required: true, maxlength: 50 },
-  children: [{ type: Schema.Types.ObjectId, ref: 'Athelete' }],
   payments: [{ type: Schema.Types.ObjectId, ref: 'Payment' }],
   notes: [{ type: Schema.Types.ObjectId, ref: 'Note' }],
 });

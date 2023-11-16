@@ -11,7 +11,7 @@ exports.athlete_list = asyncHandler(async (req, res, next) => {
   )
     .sort({ first_name: 1 })
     .exec();
-  res.json({ athlete_list });
+  res.status(200).json({ athlete_list });
 });
 
 // Handle GET details of a specific athlete.
@@ -28,7 +28,7 @@ exports.athlete_detail = [
       next(err);
     }
 
-    res.json({ athlete });
+    res.status(200).json({ athlete });
   }),
 ];
 
@@ -54,8 +54,8 @@ exports.athlete_create_post = [
     .withMessage('Last name must be specified')
     .matches(/^[a-zA-Z0-9-]*$/) // Allow - in lastname
     .withMessage('First name has non-alphanumeric characters'),
-    // .isAlphanumeric()
-    // .withMessage('First name has non-alphanumeric charecters'),
+  // .isAlphanumeric()
+  // .withMessage('First name has non-alphanumeric charecters'),
   body('birthdate', 'Invalid date of birth').isISO8601().toDate(),
 
   // Validate and sanitize the 'mobile' field
@@ -98,7 +98,10 @@ exports.athlete_create_post = [
       school: req.body.school,
       active: req.body.active,
     });
-    console.log("🚀 ~ file: athleteApiController.js:101 ~ asyncHandler ~ athlete:", athlete)
+    console.log(
+      '🚀 ~ file: athleteApiController.js:101 ~ asyncHandler ~ athlete:',
+      athlete
+    );
 
     if (!errors.isEmpty()) {
       console.log(
@@ -133,8 +136,8 @@ exports.athlete_update = [
     .withMessage('Last name must be specified')
     .matches(/^[a-zA-Z0-9-]*$/) // Allow - in lastname
     .withMessage('First name has non-alphanumeric characters'),
-    // .isAlphanumeric()
-    // .withMessage('First name has non-alphanumeric charecters'),
+  // .isAlphanumeric()
+  // .withMessage('First name has non-alphanumeric charecters'),
   body('birthdate', 'Invalid date of birth').isISO8601().toDate(),
 
   // Validate and sanitize the 'mobile' field
@@ -185,7 +188,7 @@ exports.athlete_update = [
         { $set: athlete },
         { new: true } // Returns the modified document
       );
-      res.status(203).json({ message: 'Success!' });
+      res.status(201).json({ message: 'Success!' });
     }
   }),
 ];
@@ -198,7 +201,21 @@ exports.athlete_delete = [
   },
   validateObjectId,
   asyncHandler(async (req, res, next) => {
-    await Athlete.findByIdAndDelete(req.params.id);
-    res.status(203).json({ message: 'Success!' });
+    try {
+      const athlete = await Athlete.findById(req.params.id);
+
+      if (athlete) {
+        await Athlete.findByIdAndDelete(req.params.id);
+        // res.status(200).json({ message: 'DELETE is success!' });
+        // res.status(204).send();
+        res.status(204).end();
+      } else {
+        console.log('Record does not exist!');
+        res.status(500).json({ message: 'Record does not exist!' });
+      }
+    } catch (error) {
+      console.log('Deletion failed');
+      res.status(500).json(error);
+    }
   }),
 ];

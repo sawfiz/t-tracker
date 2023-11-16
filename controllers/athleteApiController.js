@@ -98,17 +98,13 @@ exports.athlete_create_post = [
       school: req.body.school,
       active: req.body.active,
     });
-    console.log(
-      '🚀 ~ file: athleteApiController.js:101 ~ asyncHandler ~ athlete:',
-      athlete
-    );
 
     if (!errors.isEmpty()) {
       console.log(
         '🚀 ~ file: athleteApiController.js:86 ~ asyncHandler ~ errors:',
         errors
       );
-      res.json({ errors });
+      res.status(400).json({ errors });
     } else {
       await athlete.save();
       res.status(201).json({ message: 'Success' });
@@ -179,7 +175,7 @@ exports.athlete_update = [
     });
 
     if (!errors.isEmpty()) {
-      res.json(JSON.stringify(errors));
+      res.status(400).json({ errors });
     } else {
       console.log('updated athlete');
       // Data from form is valid. Update the record.

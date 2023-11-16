@@ -5,7 +5,12 @@ const { body, validationResult } = require('express-validator');
 
 // Handle GET all athletes.
 exports.athlete_list = asyncHandler(async (req, res, next) => {
-  const athlete_list = await Athlete.find({}, "first_name last_name gender active").sort({ last_name: 1 }).exec();
+  const athlete_list = await Athlete.find(
+    {},
+    'first_name last_name gender active'
+  )
+    .sort({ first_name: 1 })
+    .exec();
   res.json({ athlete_list });
 });
 
@@ -38,15 +43,19 @@ exports.athlete_create_post = [
     .isLength({ min: 1 })
     .escape()
     .withMessage('First name must be specified')
-    .isAlphanumeric()
-    .withMessage('First name has non-alphanumeric charecters'),
+    // .isAlphanumeric()
+    // .withMessage('First name has non-alphanumeric charecters'),
+    .matches(/^[a-zA-Z0-9 .-]*$/) // Allow space / . / - in firstname
+    .withMessage('First name has non-alphanumeric characters'),
   body('last_name')
     .trim()
     .isLength({ min: 1 })
     .escape()
     .withMessage('Last name must be specified')
-    .isAlphanumeric()
-    .withMessage('First name has non-alphanumeric charecters'),
+    .matches(/^[a-zA-Z0-9-]*$/) // Allow - in lastname
+    .withMessage('First name has non-alphanumeric characters'),
+    // .isAlphanumeric()
+    // .withMessage('First name has non-alphanumeric charecters'),
   body('birthdate', 'Invalid date of birth').isISO8601().toDate(),
 
   // Validate and sanitize the 'mobile' field
@@ -78,10 +87,6 @@ exports.athlete_create_post = [
 
   asyncHandler(async (req, res, next) => {
     const errors = validationResult(req);
-    console.log(
-      '🚀 ~ file: athleteApiController.js:86 ~ asyncHandler ~ errors:',
-      errors
-    );
 
     const athlete = new Athlete({
       first_name: req.body.first_name,
@@ -93,8 +98,13 @@ exports.athlete_create_post = [
       school: req.body.school,
       active: req.body.active,
     });
+    console.log("🚀 ~ file: athleteApiController.js:101 ~ asyncHandler ~ athlete:", athlete)
 
     if (!errors.isEmpty()) {
+      console.log(
+        '🚀 ~ file: athleteApiController.js:86 ~ asyncHandler ~ errors:',
+        errors
+      );
       res.json({ errors });
     } else {
       await athlete.save();
@@ -112,15 +122,19 @@ exports.athlete_update = [
     .isLength({ min: 1 })
     .escape()
     .withMessage('First name must be specified')
-    .isAlphanumeric()
-    .withMessage('First name has non-alphanumeric charecters'),
+    // .isAlphanumeric()
+    // .withMessage('First name has non-alphanumeric charecters'),
+    .matches(/^[a-zA-Z0-9 .-]*$/) // Allow space / . / - in firstname
+    .withMessage('First name has non-alphanumeric characters'),
   body('last_name')
     .trim()
     .isLength({ min: 1 })
     .escape()
     .withMessage('Last name must be specified')
-    .isAlphanumeric()
-    .withMessage('First name has non-alphanumeric charecters'),
+    .matches(/^[a-zA-Z0-9-]*$/) // Allow - in lastname
+    .withMessage('First name has non-alphanumeric characters'),
+    // .isAlphanumeric()
+    // .withMessage('First name has non-alphanumeric charecters'),
   body('birthdate', 'Invalid date of birth').isISO8601().toDate(),
 
   // Validate and sanitize the 'mobile' field

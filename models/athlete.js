@@ -16,7 +16,7 @@ const schema = new Schema(
     school: { type: String, maxlength: 50 },
     time_trails: [{ type: Schema.Types.ObjectId, ref: 'Timetrial' }],
     notes: [{ type: Schema.Types.ObjectId, ref: 'Note' }],
-    active: { type: Boolean, default: true },
+    active: { type: Boolean },
     photoUrl: { type: String },
   },
   {

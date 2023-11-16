@@ -3,13 +3,13 @@ const asyncHandler = require('express-async-handler');
 const validateObjectId = require('../middleware/validateObjectId');
 const { body, validationResult } = require('express-validator');
 
-// Display list of all athletes.
+// Handle GET all athletes.
 exports.athlete_list = asyncHandler(async (req, res, next) => {
-  const athlete_list = await Athlete.find().sort({ family_name: 1 }).exec();
+  const athlete_list = await Athlete.find({}, "first_name last_name gender active").sort({ last_name: 1 }).exec();
   res.json({ athlete_list });
 });
 
-// Display detail page for a specific athlete.
+// Handle GET details of a specific athlete.
 exports.athlete_detail = [
   validateObjectId,
   asyncHandler(async (req, res, next) => {
@@ -27,12 +27,7 @@ exports.athlete_detail = [
   }),
 ];
 
-// Display athlete create form on GET.
-exports.athlete_create_get = (req, res, next) => {
-  res.render('athlete_form', { title: 'Create Athlete' });
-};
-
-// Handle athlete create on POST.
+// Handle POST to create an athlete
 exports.athlete_create_post = [
   (req, res, next) => {
     console.log('POST received');
@@ -83,7 +78,10 @@ exports.athlete_create_post = [
 
   asyncHandler(async (req, res, next) => {
     const errors = validationResult(req);
-    console.log("🚀 ~ file: athleteApiController.js:86 ~ asyncHandler ~ errors:", errors)
+    console.log(
+      '🚀 ~ file: athleteApiController.js:86 ~ asyncHandler ~ errors:',
+      errors
+    );
 
     const athlete = new Athlete({
       first_name: req.body.first_name,
@@ -93,42 +91,20 @@ exports.athlete_create_post = [
       mobile: req.body.mobile,
       email: req.body.email,
       school: req.body.school,
+      active: req.body.active,
     });
 
     if (!errors.isEmpty()) {
-      // res.render('athlete_form', {
-      //   title: 'Create Athlete',
-      //   athlete,
-      //   errors: errors.array(),
-      // });
       res.json({ errors });
     } else {
       await athlete.save();
-      res.status(201).json({message: "Success"})
+      res.status(201).json({ message: 'Success' });
     }
   }),
 ];
 
-// Display athelete form on a GET request.
-exports.athlete_update_get = [
-  validateObjectId,
-  asyncHandler(async (req, res, next) => {
-    const [athlete] = await Promise.all([
-      Athlete.findById(req.params.id).exec(),
-    ]);
-
-    if (athlete === null) {
-      const err = new Error('athlete not found');
-      err.status = 404;
-      next(err);
-    }
-
-    res.render('athlete_form', { title: 'Update Athelete:', athlete });
-  }),
-];
-
-// Handle athlete update on POST.
-exports.athlete_update_post = [
+// Handle UPDATE/PUT an athlete
+exports.athlete_update = [
   validateObjectId,
 
   body('first_name')
@@ -181,15 +157,12 @@ exports.athlete_update_post = [
       mobile: req.body.mobile,
       email: req.body.email,
       school: req.body.school,
+      active: req.body.active,
       _id: req.params.id,
     });
 
     if (!errors.isEmpty()) {
-      res.render('athlete_form', {
-        title: 'Update Athlete',
-        athlete,
-        errors: errors.array(),
-      });
+      res.json(JSON.stringify(errors));
     } else {
       console.log('updated athlete');
       // Data from form is valid. Update the record.
@@ -198,8 +171,20 @@ exports.athlete_update_post = [
         { $set: athlete },
         { new: true } // Returns the modified document
       );
-      // Redirect to athlete detail page.
-      res.redirect(updatedAthlete.url);
+      res.status(203).json({ message: 'Success!' });
     }
+  }),
+];
+
+// Handle DELETE an athlete
+exports.athlete_delete = [
+  (req, res, next) => {
+    console.log('DELETE received');
+    next();
+  },
+  validateObjectId,
+  asyncHandler(async (req, res, next) => {
+    await Athlete.findByIdAndDelete(req.params.id);
+    res.status(203).json({ message: 'Success!' });
   }),
 ];

@@ -41,13 +41,4 @@ schema.virtual('name').get(function () {
   return fullname;
 });
 
-// Virtual for birthdate in YYYY-MM-DD format
-schema.virtual('birthdate_yyyy_mm_dd').get(function () {
-  return DateTime.fromJSDate(this.birthdate).toISODate(); // format 'YYYY-MM-DD'
-});
-
-schema.virtual('url').get(function () {
-  return `/data/athlete/${this._id}`;
-});
-
 module.exports = mongoose.model('Athlete', schema);

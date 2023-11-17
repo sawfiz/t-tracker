@@ -16,6 +16,21 @@ exports.user_create_post = [
     console.log('POST received');
     next();
   },
+
+  body('first_name')
+    .trim()
+    .isLength({ min: 1 })
+    .escape()
+    .withMessage('First name must be specified')
+    .matches(/^[a-zA-Z0-9 .-]*$/) // Allow space / . / - in firstname
+    .withMessage('First name has non-alphanumeric characters'),
+  body('last_name')
+    .trim()
+    .isLength({ min: 1 })
+    .escape()
+    .withMessage('Last name must be specified')
+    .matches(/^[a-zA-Z0-9-]*$/) // Allow - in lastname
+    .withMessage('First name has non-alphanumeric characters'),
   body('username')
     .trim()
     .isLength({ min: 4, max: 10 })
@@ -23,7 +38,6 @@ exports.user_create_post = [
     .withMessage('Username must be between 4 to 8 characters.')
     .isAlphanumeric()
     .withMessage('First name has non-alphanumeric charecters.'),
-
   body('password')
     .trim()
     .isLength({ min: 3 })
@@ -44,6 +58,9 @@ exports.user_create_post = [
         } else {
           try {
             const user = new User({
+              first_name: req.body.first_name,
+              last_name: req.body.last_name,
+              gender: req.body.gender,
               username: req.body.username,
               password: hashedPassword,
             });

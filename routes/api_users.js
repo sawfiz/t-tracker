@@ -18,7 +18,7 @@ router.post('/', user_api_controller.user_create_post);
 // router.put('/:id', user_api_controller.user_update);
 
 // DELETE request to delete user.
-// router.delete('/:id', user_api_controller.user_delete);
+router.delete('/:id', user_api_controller.user_delete);
 
 /* Parents requests */
 

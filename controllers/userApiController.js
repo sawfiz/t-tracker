@@ -118,3 +118,30 @@ exports.user_create_post = [
     }
   },
 ];
+
+// Handle DELETE an user
+exports.user_delete = [
+  (req, res, next) => {
+    console.log('DELETE received');
+    next();
+  },
+  validateObjectId,
+  asyncHandler(async (req, res, next) => {
+    try {
+      const user = await User.findById(req.params.id);
+
+      if (user) {
+        await User.findByIdAndDelete(req.params.id);
+        // res.status(200).json({ message: 'DELETE is success!' });
+        // res.status(204).send();
+        res.status(204).end();
+      } else {
+        console.log('Record does not exist!');
+        res.status(500).json({ message: 'Record does not exist!' });
+      }
+    } catch (error) {
+      console.log('Deletion failed');
+      res.status(500).json(error);
+    }
+  }),
+];

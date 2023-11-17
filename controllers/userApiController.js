@@ -12,15 +12,27 @@ const User = require('../models/user');
 
 // Handle GET all users.
 exports.user_list = asyncHandler(async (req, res, next) => {
-  const user_list = await User.find(
-    {},
-    'username gender active'
-  )
-    .sort({ first_name: 1 })
+  const user_list = await User.find({}, 'username gender active')
+    .sort({ username: 1 })
     .exec();
   res.status(200).json({ user_list });
 });
 
+// Handle GET details of a specific user.
+exports.user_detail = [
+  validateObjectId,
+  asyncHandler(async (req, res, next) => {
+    const [user] = await Promise.all([User.findById(req.params.id).exec()]);
+
+    if (user === null) {
+      const err = new Error('user not found');
+      err.status = 404;
+      next(err);
+    }
+
+    res.status(200).json({ user });
+  }),
+];
 
 // Handle POST to create an user
 exports.user_create_post = [
@@ -54,7 +66,20 @@ exports.user_create_post = [
     .trim()
     .isLength({ min: 3 })
     .escape()
-    .withMessage('Password must be specified'),
+    .withMessage('Password must be at least 3 characters.'),
+  // Validate and sanitize the 'mobile' field
+  body('mobile')
+    .matches(/^\d{8}$/)
+    .withMessage('Mobile number must be exactly 8 digits')
+    .trim()
+    .escape(),
+
+  // Validate and sanitize the 'email' field
+  body('email')
+    .optional({ nullable: true, checkFalsy: true })
+    .isEmail()
+    .withMessage('Invalid email address')
+    .normalizeEmail(),
 
   async (req, res, next) => {
     const errors = validationResult(req);
@@ -75,6 +100,8 @@ exports.user_create_post = [
               gender: req.body.gender,
               username: req.body.username,
               password: hashedPassword,
+              mobile: req.body.mobile,
+              email: req.body.email,
             });
             const result = await user.save();
             console.log(

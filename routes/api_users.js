@@ -9,7 +9,7 @@ const user_api_controller = require('../controllers/userApiController');
 router.get('/', user_api_controller.user_list);
 
 // GET request for one user.
-// router.get('/:id', user_api_controller.user_detail);
+router.get('/:id', user_api_controller.user_detail);
 
 // POST request for creating user.
 router.post('/', user_api_controller.user_create_post);

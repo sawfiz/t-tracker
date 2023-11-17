@@ -10,6 +10,18 @@ const bcrypt = require('bcryptjs');
 // Model
 const User = require('../models/user');
 
+// Handle GET all users.
+exports.user_list = asyncHandler(async (req, res, next) => {
+  const user_list = await User.find(
+    {},
+    'username gender active'
+  )
+    .sort({ first_name: 1 })
+    .exec();
+  res.status(200).json({ user_list });
+});
+
+
 // Handle POST to create an user
 exports.user_create_post = [
   (req, res, next) => {

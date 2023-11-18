@@ -1,18 +1,35 @@
 const Athlete = require('../models/athlete');
 const asyncHandler = require('express-async-handler');
+const jwt = require('jsonwebtoken');
 const validateObjectId = require('../middleware/validateObjectId');
+const getJWT = require('../middleware/getJWT');
 const { body, validationResult } = require('express-validator');
 
 // Handle GET all athletes.
-exports.athlete_list = asyncHandler(async (req, res, next) => {
-  const athlete_list = await Athlete.find(
-    {},
-    'first_name last_name gender active'
-  )
-    .sort({ first_name: 1 })
-    .exec();
-  res.status(200).json({ athlete_list });
-});
+exports.athlete_list = [
+  getJWT,
+  (req, res, next) => {
+    jwt.verify(
+      req.token,
+      'secretkey',
+      asyncHandler(async (err, authData) => {
+        if (err) {
+          console.log("🚀 ~ file: athleteApiController.js:17 ~ asyncHandler ~ err:", err)
+          res.sendStatus(403);
+        } else {
+          const athlete_list = await Athlete.find(
+            {},
+            'first_name last_name gender active'
+          )
+            .sort({ first_name: 1 })
+            .exec();
+            console.log("🚀 ~ file: athleteApiController.js:26 ~ asyncHandler ~ authData:", authData)
+          res.status(200).json({ athlete_list, authData });
+        }
+      })
+    );
+  },
+];
 
 // Handle GET details of a specific athlete.
 exports.athlete_detail = [

@@ -1,5 +1,6 @@
-var express = require('express');
-var router = express.Router();
+const express = require('express');
+const router = express.Router();
+const jwt = require('jsonwebtoken');
 
 const passport = require('passport');
 
@@ -23,7 +24,12 @@ router.post('/login', async (req, res, next) => {
         return res.status(500).json({ message: 'Internal server error' });
       }
 
-      return res.status(200).json({ message: 'Logged in successfully', user, info });
+      // Send the JWT token
+      jwt.sign({ user }, 'secretkey', { expiresIn: '1h' }, (err, token) => {
+        return res
+          .status(200)
+          .json({ message: 'Logged in successfully', user, token, info });
+      });
     });
   })(req, res, next);
 });
@@ -33,7 +39,7 @@ router.get('/logout', (req, res, next) => {
   // Passport provides a logout() function to terminate a login session
   req.logout((err) => {
     if (err) {
-      res.status(403).json({message: "Log out failed"})
+      res.status(403).json({ message: 'Log out failed' });
     }
 
     res.status(200).json({ message: 'success' });

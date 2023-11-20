@@ -14,17 +14,29 @@ exports.athlete_list = [
       'secretkey',
       asyncHandler(async (err, authData) => {
         if (err) {
-          console.log("🚀 ~ file: athleteApiController.js:17 ~ asyncHandler ~ err:", err)
-          res.sendStatus(403);
+          res.status(403).json(err);
         } else {
-          const athlete_list = await Athlete.find(
-            {},
-            'first_name last_name gender active'
-          )
-            .sort({ first_name: 1 })
-            .exec();
-            console.log("🚀 ~ file: athleteApiController.js:26 ~ asyncHandler ~ authData:", authData)
-          res.status(200).json({ athlete_list, authData });
+          try {
+            const athlete_list = await Athlete.find(
+              {},
+              'first_name last_name gender active'
+            )
+              .sort({ first_name: 1 })
+              .maxTimeMS(5000) // Set the maximum time for query execution
+              .exec();
+            // Send Success status and data
+            res.status(200).json({ athlete_list });
+          } catch (error) {
+            if (error.name === 'MongooseError') {
+              // Handle database connection timeout
+              console.error('Database connection timed out:', error);
+              res.status(500).json({ error: 'Database error' });
+            } else {
+              // Handle other errors and send an appropriate response
+              console.error('Error fetching data:', error);
+              res.status(500).json({ error: 'Internal server error' });
+            }
+          }
         }
       })
     );

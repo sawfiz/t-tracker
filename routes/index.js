@@ -12,16 +12,16 @@ router.get('/', function (req, res, next) {
 router.post('/login', async (req, res, next) => {
   passport.authenticate('local', (err, user, info) => {
     if (err) {
-      return res.status(500).json({ message: 'Internal server error' });
+      return res.status(500).json({ error: 'Internal server error' });
     }
 
     if (!user) {
-      return res.status(401).json({ message: 'Authentication failed' });
+      return res.status(401).json({ error: 'Authentication failed' });
     }
 
     req.logIn(user, (err) => {
       if (err) {
-        return res.status(500).json({ message: 'Internal server error' });
+        return res.status(500).json({ error: 'Internal server error' });
       }
 
       // Send the JWT token

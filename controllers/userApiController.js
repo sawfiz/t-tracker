@@ -85,33 +85,35 @@ exports.user_create_post = [
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
-      console.log('🚀 ~ file: userApiController.js:37 ~ errors:', errors);
       res.status(400).json({ errors });
     } else {
       bcrypt.hash(req.body.password, 10, async (err, hashedPassword) => {
         if (err) {
-          console.log('Error hashing password');
-          res.status(500).json({ error: 'Error hasing password.' });
+          res.status(400).json({ error: 'Error hasing password' });
         } else {
           try {
-            const user = new User({
-              first_name: req.body.first_name,
-              last_name: req.body.last_name,
-              gender: req.body.gender,
+            // Make sure username is not already used
+            const userExists = await User.findOne({
               username: req.body.username,
-              password: hashedPassword,
-              mobile: req.body.mobile,
-              email: req.body.email,
             });
-            const result = await user.save();
-            console.log(
-              '🚀 ~ file: userApiController.js:51 ~ bcrypt.hash ~ result:',
-              result
-            );
 
-            res.status(201).json({ message: 'Success' });
+            if (userExists) {
+              res.status(409).json({ error: 'Username in use' });
+            } else {
+              const user = new User({
+                first_name: req.body.first_name,
+                last_name: req.body.last_name,
+                gender: req.body.gender,
+                username: req.body.username,
+                password: hashedPassword,
+                mobile: req.body.mobile,
+                email: req.body.email,
+              });
+              const result = await user.save();
+              res.status(201).json({ message: 'Success' });
+            }
           } catch (err) {
-            return next(err);
+            res.status(500).json({ error: 'Error saving user' });
           }
         }
       });

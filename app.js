@@ -2,12 +2,11 @@ require('dotenv').config();
 const express = require('express');
 const createError = require('http-errors');
 const path = require('path');
-const session = require("express-session");
+const session = require('express-session');
 
-
-const passport = require("passport");
-const LocalStrategy = require("passport-local").Strategy;
-const bcrypt = require('bcryptjs')
+const passport = require('passport');
+const LocalStrategy = require('passport-local').Strategy;
+const bcrypt = require('bcryptjs');
 
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
@@ -19,7 +18,9 @@ const dataRouter = require('./routes/data');
 const apiAthleteRouter = require('./routes/api_athletes');
 const apiUserRouter = require('./routes/api_users');
 
-const User = require('./models/user')
+const CustomError = require('./utils/CustomError');
+
+const User = require('./models/user');
 
 const app = express();
 app.use(cors()); // Enable CORS for all routes
@@ -40,6 +41,18 @@ async function connectToMongoDB() {
 // Connect to the database when the app starts
 connectToMongoDB();
 
+// Listen for Mongoose connection error
+mongoose.connection.on('error', (err) => {
+  console.error('Mongoose connection error:', err);
+  throw new CustomError(500, 'Database connection error');
+});
+
+// Listen for Mongoose disconnected event
+mongoose.connection.on('disconnected', () => {
+  console.log('Mongoose disconnected');
+  throw new CustomError(500, 'Database disconnected');
+});
+
 // ^Passport related, insert before view set up
 // This function will be called when we use the passport.authenticate() function
 passport.use(
@@ -47,16 +60,16 @@ passport.use(
     try {
       const user = await User.findOne({ username: username });
       if (!user) {
-        return done(null, false, { message: "Incorrect username" });
-      };
-      const match = await bcrypt.compare(password, user.password)
+        return done(null, false, { message: 'Incorrect username' });
+      }
+      const match = await bcrypt.compare(password, user.password);
       if (!match) {
-        return done(null, false, { message: "Incorrect password" });
-      };
+        return done(null, false, { message: 'Incorrect password' });
+      }
       return done(null, user);
-    } catch(err) {
+    } catch (err) {
       return done(err);
-    };
+    }
   })
 );
 
@@ -71,13 +84,19 @@ passport.deserializeUser(async (id, done) => {
   try {
     const user = await User.findById(id);
     done(null, user);
-  } catch(err) {
+  } catch (err) {
     done(err);
-  };
+  }
 });
 
 // Make sure to add SESSION_SECRET in .env
-app.use(session({ secret: process.env.SESSION_SECRET, resave: false, saveUninitialized: true }));
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: true,
+  })
+);
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -88,7 +107,6 @@ app.use((req, res, next) => {
 });
 
 // ^-----
-
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -117,9 +135,14 @@ app.use(function (err, req, res, next) {
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};
 
-  // render the error page
-  res.status(err.status || 500);
-  res.render('error');
+  // Check if the error is an instance of CustomError
+  if (err instanceof CustomError) {
+    // Set the status and send a JSON response with the error message
+    res.status(err.status || 500).json({ error: err.message });
+  } else {
+    // Render the error page or send an appropriate response for other errors
+    res.status(err.status || 500).json({ error: err.message });
+  }
 });
 
 module.exports = app;

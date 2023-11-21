@@ -1,72 +1,26 @@
-const Athlete = require('../models/athlete');
 const asyncHandler = require('express-async-handler');
-const jwt = require('jsonwebtoken');
-const validateObjectId = require('../middleware/validateObjectId');
-const { getJWT, verifyJWT } = require('../middleware/getJWT');
 const { body, validationResult } = require('express-validator');
 
-// Handle GET all athletes.
-// exports.athlete_list = [
-//   getJWT,
-//   (req, res, next) => {
-//     jwt.verify(
-//       req.token,
-//       'secretkey',
-//       asyncHandler(async (err, authData) => {
-//         if (err) {
-//           res.status(403).json(err);
-//         } else {
-//           try {
-//             const athlete_list = await Athlete.find(
-//               {},
-//               'first_name last_name gender active'
-//             )
-//               .sort({ first_name: 1 })
-//               .maxTimeMS(5000) // Set the maximum time for query execution
-//               .exec();
-//             // Send Success status and data
-//             res.status(200).json({ athlete_list });
-//           } catch (error) {
-//             if (error.name === 'MongooseError') {
-//               // Handle database connection timeout
-//               console.error('Database connection timed out:', error);
-//               res.status(500).json({ error: 'Database error' });
-//             } else {
-//               // Handle other errors and send an appropriate response
-//               console.error('Error fetching data:', error);
-//               res.status(500).json({ error: 'Internal server error' });
-//             }
-//           }
-//         }
-//       })
-//     );
-//   },
-// ];
+const validateObjectId = require('../middleware/validateObjectId');
+const { verifyJWT } = require('../middleware/verifyJWT');
+const CustomError = require('../utils/CustomError');
+
+const Athlete = require('../models/athlete');
+
 // Handle GET all athletes.
 exports.athlete_list = [
   verifyJWT,
   asyncHandler(async (req, res, next) => {
-    try {
-      const athlete_list = await Athlete.find(
-        {},
-        'first_name last_name gender active'
-      )
-        .sort({ first_name: 1 })
-        .maxTimeMS(5000) // Set the maximum time for query execution
-        .exec();
-      // Send Success status and data
-      res.status(200).json({ athlete_list });
-    } catch (error) {
-      if (error.name === 'MongooseError') {
-        // Handle database connection timeout
-        console.error('Database connection timed out:', error);
-        res.status(500).json({ error: 'Database error' });
-      } else {
-        // Handle other errors and send an appropriate response
-        console.error('Error fetching data:', error);
-        res.status(500).json({ error: 'Internal server error' });
-      }
-    }
+    const athlete_list = await Athlete.find(
+      {},
+      'first_name last_name gender active'
+    )
+      .sort({ first_name: 1 })
+      .maxTimeMS(5000) // Set the maximum time for query execution
+      .exec();
+    // Send Success status and data
+
+    res.status(200).json({ athlete_list });
   }),
 ];
 

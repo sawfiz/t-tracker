@@ -35,13 +35,13 @@ router.post('/login', async (req, res, next) => {
 });
 
 // GET /logout route to log the user out
-router.get('/logout', (req, res, next) => {
+router.post('/logout', (req, res, next) => {
   // Passport provides a logout() function to terminate a login session
   req.logout((err) => {
     if (err) {
       res.status(403).json({ message: 'Log out failed' });
     }
-
+    // TODO revoke the jWT
     res.status(200).json({ message: 'success' });
   });
 

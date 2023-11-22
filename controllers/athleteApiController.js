@@ -47,6 +47,7 @@ exports.athlete_detail = [
 
 // Handle POST to create an athlete
 exports.athlete_create_post = [
+  verifyJWT,
   (req, res, next) => {
     console.log('POST received');
     next();
@@ -128,7 +129,7 @@ exports.athlete_create_post = [
 // Handle UPDATE/PUT an athlete
 exports.athlete_update = [
   validateObjectId,
-
+  verifyJWT,
   body('first_name')
     .trim()
     .isLength({ min: 1 })
@@ -204,6 +205,7 @@ exports.athlete_update = [
 
 // Handle DELETE an athlete
 exports.athlete_delete = [
+  verifyJWT,
   (req, res, next) => {
     console.log('DELETE received');
     next();

@@ -137,11 +137,12 @@ app.use(function (err, req, res, next) {
 
   // Check if the error is an instance of CustomError
   if (err instanceof CustomError) {
+    console.log("🚀 ~ file: app.js:140 ~ err:", err)
     // Set the status and send a JSON response with the error message
-    res.status(err.status || 500).json({ error: err.message });
+    res.status(err.statusCode || 500).json({ status: err.statusCode, error: err.message });
   } else {
     // Render the error page or send an appropriate response for other errors
-    res.status(err.status || 500).json({ error: err.message });
+    res.status(err.status || 500).json({ status: err.staus, error: err.message });
   }
 });
 

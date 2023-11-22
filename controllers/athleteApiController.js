@@ -28,7 +28,6 @@ exports.athlete_list = [
 exports.athlete_detail = [
   validateObjectId,
   verifyJWT,
-
   asyncHandler(async (req, res, next) => {
     // console.log(req);
     const [athlete] = await Promise.all([
@@ -36,9 +35,7 @@ exports.athlete_detail = [
     ]);
 
     if (athlete === null) {
-      const err = new Error('athlete not found');
-      err.status = 404;
-      next(err);
+      throw new CustomError(404, 'Athlete not found');
     }
 
     res.status(200).json({ athlete });

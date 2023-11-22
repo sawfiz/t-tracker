@@ -4,29 +4,27 @@ const createError = require('http-errors');
 const path = require('path');
 const session = require('express-session');
 const passport = require('passport');
-
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const cors = require('cors');
 
+// Routers
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
 const dataRouter = require('./routes/data');
 const apiAthleteRouter = require('./routes/api_athletes');
 const apiUserRouter = require('./routes/api_users');
 
+// Utility modules
+const { connectToMongoDB } = require('./utils/mongooseConnection');
+const configPassport = require('./utils/configPassport');
+const globalErrorHandler = require('./utils/globalErrorHandler');
+
+// Main program
 const app = express();
 app.use(cors()); // Enable CORS for all routes
 
 // Set up mongoose connection and monitor errors
-const { connectToMongoDB } = require('./utils/mongooseConnection');
-
-// Passport related, insert before view set up
-const configPassport = require('./utils/configPassport');
-
-// Global error handler
-const globalErrorHandler = require('./utils/globalErrorHandler');
-
 connectToMongoDB();
 
 // Make sure to add SESSION_SECRET in .env
@@ -38,7 +36,7 @@ app.use(
   })
 );
 
-// Place after the session middleware
+// Place after the session middleware but before view set up
 configPassport();
 app.use(passport.initialize());
 app.use(passport.session());
@@ -53,12 +51,14 @@ app.use((req, res, next) => {
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
 
+// Misc middleware
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Use routes
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/data', dataRouter);

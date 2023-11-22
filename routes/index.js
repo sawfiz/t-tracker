@@ -1,8 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
-
 const passport = require('passport');
+
+const CustomError = require('../utils/CustomError');
 
 /* GET home page. */
 router.get('/', function (req, res, next) {
@@ -39,7 +40,7 @@ router.post('/logout', (req, res, next) => {
   // Passport provides a logout() function to terminate a login session
   req.logout((err) => {
     if (err) {
-      res.status(403).json({ message: 'Log out failed' });
+      throw new CustomError(500, 'Log out failed')
     }
     // TODO revoke the jWT
     res.status(200).json({ message: 'success' });

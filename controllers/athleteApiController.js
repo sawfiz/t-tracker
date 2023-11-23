@@ -7,6 +7,57 @@ const CustomError = require('../utils/CustomError');
 
 const Athlete = require('../models/athlete');
 
+const validateInputs = () => {
+  return [
+    body('first_name')
+      .trim()
+      .isLength({ min: 1 })
+      .escape()
+      .withMessage('First name must be specified')
+      // .isAlphanumeric()
+      // .withMessage('First name has non-alphanumeric charecters'),
+      .matches(/^[a-zA-Z0-9 .-]*$/) // Allow space / . / - in firstname
+      .withMessage('First name has non-alphanumeric characters'),
+    body('last_name')
+      .trim()
+      .isLength({ min: 1 })
+      .escape()
+      .withMessage('Last name must be specified')
+      .matches(/^[a-zA-Z0-9-]*$/) // Allow - in lastname
+      .withMessage('First name has non-alphanumeric characters'),
+    // .isAlphanumeric()
+    // .withMessage('First name has non-alphanumeric charecters'),
+    body('birthdate', 'Invalid date of birth').isISO8601().toDate(),
+
+    // Validate and sanitize the 'mobile' field
+    body('mobile')
+      .optional({ nullable: true, checkFalsy: true })
+      .matches(/^\d{8}$/)
+      .withMessage('Mobile number must be exactly 8 digits')
+      .trim()
+      .escape(),
+
+    // Validate and sanitize the 'email' field
+    body('email')
+      .optional({ nullable: true, checkFalsy: true })
+      .isEmail()
+      .withMessage('Invalid email address')
+      .normalizeEmail(),
+
+    // Validate and sanitize the 'school' field
+    body('school')
+      .optional({ nullable: true, checkFalsy: true })
+      .isLength({ min: 2 })
+      .withMessage('School name must be at least 2 characters')
+      .trim()
+      .escape(),
+    (req, res, next) => {
+      console.log('Went through validations');
+      next();
+    },
+  ];
+};
+
 // Handle GET all athletes.
 exports.athlete_list = [
   verifyJWT,
@@ -49,52 +100,7 @@ exports.athlete_create_post = [
     next();
   },
   verifyJWT,
-  body('first_name')
-    .trim()
-    .isLength({ min: 1 })
-    .escape()
-    .withMessage('First name must be specified')
-    // .isAlphanumeric()
-    // .withMessage('First name has non-alphanumeric charecters'),
-    .matches(/^[a-zA-Z0-9 .-]*$/) // Allow space / . / - in firstname
-    .withMessage('First name has non-alphanumeric characters'),
-  body('last_name')
-    .trim()
-    .isLength({ min: 1 })
-    .escape()
-    .withMessage('Last name must be specified')
-    .matches(/^[a-zA-Z0-9-]*$/) // Allow - in lastname
-    .withMessage('First name has non-alphanumeric characters'),
-  // .isAlphanumeric()
-  // .withMessage('First name has non-alphanumeric charecters'),
-  body('birthdate', 'Invalid date of birth').isISO8601().toDate(),
-
-  // Validate and sanitize the 'mobile' field
-  body('mobile')
-    .optional({ nullable: true, checkFalsy: true })
-    .matches(/^\d{8}$/)
-    .withMessage('Mobile number must be exactly 8 digits')
-    .trim()
-    .escape(),
-
-  // Validate and sanitize the 'email' field
-  body('email')
-    .optional({ nullable: true, checkFalsy: true })
-    .isEmail()
-    .withMessage('Invalid email address')
-    .normalizeEmail(),
-
-  // Validate and sanitize the 'school' field
-  body('school')
-    .optional({ nullable: true, checkFalsy: true })
-    .isLength({ min: 2 })
-    .withMessage('School name must be at least 2 characters')
-    .trim()
-    .escape(),
-  (req, res, next) => {
-    console.log('Went through validations');
-    next();
-  },
+  validateInputs(),
 
   asyncHandler(async (req, res, next) => {
     const validationErrors = validationResult(req);
@@ -131,48 +137,7 @@ exports.athlete_create_post = [
 exports.athlete_update = [
   validateObjectId,
   verifyJWT,
-  body('first_name')
-    .trim()
-    .isLength({ min: 1 })
-    .escape()
-    .withMessage('First name must be specified')
-    // .isAlphanumeric()
-    // .withMessage('First name has non-alphanumeric charecters'),
-    .matches(/^[a-zA-Z0-9 .-]*$/) // Allow space / . / - in firstname
-    .withMessage('First name has non-alphanumeric characters'),
-  body('last_name')
-    .trim()
-    .isLength({ min: 1 })
-    .escape()
-    .withMessage('Last name must be specified')
-    .matches(/^[a-zA-Z0-9-]*$/) // Allow - in lastname
-    .withMessage('First name has non-alphanumeric characters'),
-  // .isAlphanumeric()
-  // .withMessage('First name has non-alphanumeric charecters'),
-  body('birthdate', 'Invalid date of birth').isISO8601().toDate(),
-
-  // Validate and sanitize the 'mobile' field
-  body('mobile')
-    .optional({ nullable: true, checkFalsy: true })
-    .matches(/^\d{8}$/)
-    .withMessage('Mobile number must be exactly 8 digits')
-    .trim()
-    .escape(),
-
-  // Validate and sanitize the 'email' field
-  body('email')
-    .optional({ nullable: true, checkFalsy: true })
-    .isEmail()
-    .withMessage('Invalid email address')
-    .normalizeEmail(),
-
-  // Validate and sanitize the 'school' field
-  body('school')
-    .optional({ nullable: true, checkFalsy: true })
-    .isLength({ min: 2 })
-    .withMessage('School name must be at least 2 characters')
-    .trim()
-    .escape(),
+  validateInputs(),
 
   asyncHandler(async (req, res, next) => {
     console.log('Validated');

@@ -190,7 +190,7 @@ exports.athlete_update = [
     });
 
     if (!errors.isEmpty()) {
-      res.status(400).json({ errors });
+      throw new CustomError(400, JSON.stringify(validationErrors));
     } else {
       console.log('updated athlete');
       // Data from form is valid. Update the record.

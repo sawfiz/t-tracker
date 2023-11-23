@@ -44,11 +44,11 @@ exports.athlete_detail = [
 
 // Handle POST to create an athlete
 exports.athlete_create_post = [
-  verifyJWT,
   (req, res, next) => {
     console.log('POST received');
     next();
   },
+  verifyJWT,
   body('first_name')
     .trim()
     .isLength({ min: 1 })
@@ -97,7 +97,7 @@ exports.athlete_create_post = [
   },
 
   asyncHandler(async (req, res, next) => {
-    const errors = validationResult(req);
+    const validationErrors = validationResult(req);
 
     const athlete = new Athlete({
       first_name: req.body.first_name,
@@ -110,13 +110,17 @@ exports.athlete_create_post = [
       active: req.body.active,
     });
 
-    if (!errors.isEmpty()) {
-      console.log(
-        '🚀 ~ file: athleteApiController.js:86 ~ asyncHandler ~ errors:',
-        errors
-      );
-      res.status(400).json({ errors });
+    if (!validationErrors.isEmpty()) {
+      throw new CustomError(400, JSON.stringify(validationErrors));
     } else {
+      // Make sure username is not already used
+      const userExists = await Athlete.findOne({
+        first_name: req.body.first_name,
+      });
+
+      // if (userExists) res.status(409).json({ error: 'Username in use' });
+      if (userExists) throw new CustomError(409, 'Athlete already exists');
+
       await athlete.save();
       res.status(201).json({ message: 'Success' });
     }

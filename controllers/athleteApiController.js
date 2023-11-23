@@ -176,7 +176,7 @@ exports.athlete_update = [
 
   asyncHandler(async (req, res, next) => {
     console.log('Validated');
-    const errors = validationResult(req);
+    const validationErrors = validationResult(req);
     const athlete = new Athlete({
       first_name: req.body.first_name,
       last_name: req.body.last_name,
@@ -189,7 +189,7 @@ exports.athlete_update = [
       _id: req.params.id,
     });
 
-    if (!errors.isEmpty()) {
+    if (!validationErrors.isEmpty()) {
       throw new CustomError(400, JSON.stringify(validationErrors));
     } else {
       console.log('updated athlete');

@@ -1,7 +1,10 @@
 // Libraries
 const asyncHandler = require('express-async-handler');
 const { body, validationResult } = require('express-validator');
+
 const validateObjectId = require('../middleware/validateObjectId');
+const { verifyJWT } = require('../middleware/verifyJWT');
+const CustomError = require('../utils/CustomError');
 
 // Seurity
 const passport = require('passport');
@@ -11,12 +14,15 @@ const bcrypt = require('bcryptjs');
 const User = require('../models/user');
 
 // Handle GET all users.
-exports.user_list = asyncHandler(async (req, res, next) => {
-  const user_list = await User.find({}, 'username gender active')
-    .sort({ username: 1 })
-    .exec();
-  res.status(200).json({ user_list });
-});
+exports.user_list = [
+  verifyJWT,
+  asyncHandler(async (req, res, next) => {
+    const user_list = await User.find({}, 'first_name last_name username gender active')
+      .sort({ username: 1 })
+      .exec();
+    res.status(200).json({ user_list });
+  }),
+];
 
 // Handle GET details of a specific user.
 exports.user_detail = [

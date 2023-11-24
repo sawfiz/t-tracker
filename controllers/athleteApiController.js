@@ -1,3 +1,4 @@
+// Libraries
 const asyncHandler = require('express-async-handler');
 const { body, validationResult } = require('express-validator');
 
@@ -5,6 +6,7 @@ const validateObjectId = require('../middleware/validateObjectId');
 const { verifyJWT } = require('../middleware/verifyJWT');
 const CustomError = require('../utils/CustomError');
 
+// Model
 const Athlete = require('../models/athlete');
 
 const validateInputs = () => {

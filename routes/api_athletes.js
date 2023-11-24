@@ -6,7 +6,7 @@ const athlete_api_controller = require('../controllers/athleteApiController');
 /* Athlete requests */
 // GET request for list of all athletes
 // !Make sure /all route is place before /:id
-router.get('/', athlete_api_controller.athlete_list);
+router.get('/', athlete_api_controller.athletes_list);
 
 // GET request for one athlete.
 router.get('/:id', athlete_api_controller.athlete_detail);

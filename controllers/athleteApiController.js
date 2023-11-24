@@ -61,10 +61,10 @@ const validateInputs = () => {
 };
 
 // Handle GET all athletes.
-exports.athlete_list = [
+exports.athletes_list = [
   verifyJWT,
   asyncHandler(async (req, res, next) => {
-    const athlete_list = await Athlete.find(
+    const athletes_list = await Athlete.find(
       {},
       'first_name last_name gender active'
     )
@@ -73,7 +73,7 @@ exports.athlete_list = [
       .exec();
     // Send Success status and data
 
-    res.status(200).json({ athlete_list });
+    res.status(200).json({ athletes_list });
   }),
 ];
 
@@ -107,6 +107,24 @@ exports.athlete_create_post = [
   asyncHandler(async (req, res, next) => {
     const validationErrors = validationResult(req);
 
+    if (!validationErrors.isEmpty()) {
+      try {
+        throw new CustomError(400, JSON.stringify(validationErrors));
+      } catch (err) {
+        console.log(
+          '🚀 ~ file: athleteApiController.js:115 ~ asyncHandler ~ err:',
+          err
+        );
+      }
+    }
+    // Make sure username is not already used
+    const userExists = await Athlete.findOne({
+      first_name: req.body.first_name,
+    });
+
+    // if (userExists) res.status(409).json({ error: 'Username in use' });
+    if (userExists) throw new CustomError(409, 'Athlete already exists');
+
     const athlete = new Athlete({
       first_name: req.body.first_name,
       last_name: req.body.last_name,
@@ -117,21 +135,8 @@ exports.athlete_create_post = [
       school: req.body.school,
       active: req.body.active,
     });
-
-    if (!validationErrors.isEmpty()) {
-      throw new CustomError(400, JSON.stringify(validationErrors));
-    } else {
-      // Make sure username is not already used
-      const userExists = await Athlete.findOne({
-        first_name: req.body.first_name,
-      });
-
-      // if (userExists) res.status(409).json({ error: 'Username in use' });
-      if (userExists) throw new CustomError(409, 'Athlete already exists');
-
-      await athlete.save();
-      res.status(201).json({ message: 'Success' });
-    }
+    await athlete.save();
+    res.status(201).json({ message: 'Success' });
   }),
 ];
 

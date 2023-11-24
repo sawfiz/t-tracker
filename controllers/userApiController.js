@@ -14,13 +14,16 @@ const bcrypt = require('bcryptjs');
 const User = require('../models/user');
 
 // Handle GET all users.
-exports.user_list = [
+exports.users_list = [
   verifyJWT,
   asyncHandler(async (req, res, next) => {
-    const user_list = await User.find({}, 'first_name last_name username gender active')
+    const users_list = await User.find(
+      {},
+      'first_name last_name username gender active'
+    )
       .sort({ username: 1 })
       .exec();
-    res.status(200).json({ user_list });
+    res.status(200).json({ users_list });
   }),
 ];
 
@@ -87,44 +90,39 @@ exports.user_create_post = [
     .withMessage('Invalid email address')
     .normalizeEmail(),
 
-  async (req, res, next) => {
-    const errors = validationResult(req);
+  asyncHandler(async (req, res, next) => {
+    const validationErrors = validationResult(req);
 
-    if (!errors.isEmpty()) {
-      res.status(400).json({ errors });
-    } else {
-      bcrypt.hash(req.body.password, 10, async (err, hashedPassword) => {
-        if (err) {
-          res.status(400).json({ error: 'Error hasing password' });
-        } else {
-          try {
-            // Make sure username is not already used
-            const userExists = await User.findOne({
-              username: req.body.username,
-            });
+    if (!validationErrors.isEmpty())
+      throw new CustomError(400, JSON.stringify(validationErrors));
 
-            if (userExists) {
-              res.status(409).json({ error: 'Username in use' });
-            } else {
-              const user = new User({
-                first_name: req.body.first_name,
-                last_name: req.body.last_name,
-                gender: req.body.gender,
-                username: req.body.username,
-                password: hashedPassword,
-                mobile: req.body.mobile,
-                email: req.body.email,
-              });
-              const result = await user.save();
-              res.status(201).json({ message: 'Success' });
-            }
-          } catch (err) {
-            res.status(500).json({ error: 'Error saving user' });
-          }
-        }
-      });
-    }
-  },
+    // Make sure username is not already used
+    const userExists = await User.findOne({
+      username: req.body.username,
+    });
+    // if (userExists) res.status(409).json({ error: 'Username in use' });
+    if (userExists) throw new CustomError(409, 'Athlete already exists');
+
+    bcrypt.hash(req.body.password, 10, async (err, hashedPassword) => {
+      if (err) throw new CustomError(400, 'Error hasing password');
+
+      try {
+        const user = new User({
+          first_name: req.body.first_name,
+          last_name: req.body.last_name,
+          gender: req.body.gender,
+          username: req.body.username,
+          password: hashedPassword,
+          mobile: req.body.mobile,
+          email: req.body.email,
+        });
+        const result = await user.save();
+        res.status(201).json({ message: 'Success' });
+      } catch (err) {
+        throw new CustomError(500, 'Erro saving user');
+      }
+    });
+  }),
 ];
 
 // Handle DELETE an user

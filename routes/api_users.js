@@ -6,7 +6,7 @@ const user_api_controller = require('../controllers/userApiController');
 /* user requests */
 // GET request for list of all users
 // !Make sure /all route is place before /:id
-router.get('/', user_api_controller.user_list);
+router.get('/', user_api_controller.users_list);
 
 // GET request for one user.
 router.get('/:id', user_api_controller.user_detail);

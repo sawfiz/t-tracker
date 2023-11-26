@@ -15,7 +15,7 @@ router.get('/:id', user_api_controller.user_detail);
 router.post('/', user_api_controller.user_create_post);
 
 // PUT request to update user.
-// router.put('/:id', user_api_controller.user_update);
+router.put('/:id', user_api_controller.user_update);
 
 // DELETE request to delete user.
 router.delete('/:id', user_api_controller.user_delete);

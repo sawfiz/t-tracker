@@ -195,11 +195,11 @@ exports.athlete_delete = [
         res.status(204).end();
       } else {
         console.log('Record does not exist!');
-        res.status(500).json({ message: 'Record does not exist!' });
+        throw new CustomError(500, "Record does not exist.")
       }
     } catch (error) {
       console.log('Deletion failed');
-      res.status(500).json(error);
+      throw new CustomError(500, error)
     }
   }),
 ];

@@ -13,6 +13,59 @@ const bcrypt = require('bcryptjs');
 // Model
 const User = require('../models/user');
 
+const validateInputs = () => {
+  return [
+    (req, res, next) => {
+      console.log('POST received');
+      next();
+    },
+
+    body('first_name')
+      .trim()
+      .isLength({ min: 1 })
+      .escape()
+      .withMessage('First name must be specified')
+      .matches(/^[a-zA-Z0-9 .-]*$/) // Allow space / . / - in firstname
+      .withMessage('First name has non-alphanumeric characters'),
+    body('last_name')
+      .trim()
+      .isLength({ min: 1 })
+      .escape()
+      .withMessage('Last name must be specified')
+      .matches(/^[a-zA-Z0-9-]*$/) // Allow - in lastname
+      .withMessage('First name has non-alphanumeric characters'),
+    body('username')
+      .trim()
+      .isLength({ min: 4, max: 10 })
+      .escape()
+      .withMessage('Username must be between 4 to 8 characters.')
+      .isAlphanumeric()
+      .withMessage('First name has non-alphanumeric charecters.'),
+    body('password')
+      .trim()
+      .isLength({ min: 3 })
+      .escape()
+      .withMessage('Password must be at least 3 characters.'),
+    // Validate and sanitize the 'mobile' field
+    body('mobile')
+      .matches(/^\d{8}$/)
+      .withMessage('Mobile number must be exactly 8 digits')
+      .trim()
+      .escape(),
+
+    // Validate and sanitize the 'email' field
+    body('email')
+      .optional({ nullable: true, checkFalsy: true })
+      .isEmail()
+      .withMessage('Invalid email address')
+      .normalizeEmail(),
+    (req, res, next) => {
+      console.log('Went through validations');
+      next();
+    },
+  ];
+};
+
 // Handle GET all users.
 exports.users_list = [
   verifyJWT,
@@ -45,51 +98,6 @@ exports.user_detail = [
 
 // Handle POST to create an user
 exports.user_create_post = [
-  (req, res, next) => {
-    console.log('POST received');
-    next();
-  },
-
-  body('first_name')
-    .trim()
-    .isLength({ min: 1 })
-    .escape()
-    .withMessage('First name must be specified')
-    .matches(/^[a-zA-Z0-9 .-]*$/) // Allow space / . / - in firstname
-    .withMessage('First name has non-alphanumeric characters'),
-  body('last_name')
-    .trim()
-    .isLength({ min: 1 })
-    .escape()
-    .withMessage('Last name must be specified')
-    .matches(/^[a-zA-Z0-9-]*$/) // Allow - in lastname
-    .withMessage('First name has non-alphanumeric characters'),
-  body('username')
-    .trim()
-    .isLength({ min: 4, max: 10 })
-    .escape()
-    .withMessage('Username must be between 4 to 8 characters.')
-    .isAlphanumeric()
-    .withMessage('First name has non-alphanumeric charecters.'),
-  body('password')
-    .trim()
-    .isLength({ min: 3 })
-    .escape()
-    .withMessage('Password must be at least 3 characters.'),
-  // Validate and sanitize the 'mobile' field
-  body('mobile')
-    .matches(/^\d{8}$/)
-    .withMessage('Mobile number must be exactly 8 digits')
-    .trim()
-    .escape(),
-
-  // Validate and sanitize the 'email' field
-  body('email')
-    .optional({ nullable: true, checkFalsy: true })
-    .isEmail()
-    .withMessage('Invalid email address')
-    .normalizeEmail(),
-
   asyncHandler(async (req, res, next) => {
     const validationErrors = validationResult(req);
 
@@ -125,8 +133,45 @@ exports.user_create_post = [
   }),
 ];
 
+// Handle UPDATE/PUT an user
+exports.user_update = [
+  validateObjectId,
+  verifyJWT,
+  validateInputs(),
+
+  asyncHandler(async (req, res, next) => {
+    console.log('Validated');
+    const validationErrors = validationResult(req);
+    const user = new User({
+      first_name: req.body.first_name,
+      last_name: req.body.last_name,
+      gender: req.body.gender,
+      username: req.params.username,
+      password: req.params.hashedPassword,
+      mobile: req.body.mobile,
+      email: req.body.email,
+      role: req.body.role,
+      _id: req.params.id,
+    });
+
+    if (!validationErrors.isEmpty()) {
+      throw new CustomError(400, JSON.stringify(validationErrors));
+    } else {
+      console.log('updated user');
+      // Data from form is valid. Update the record.
+      const updatedAthlete = await User.findByIdAndUpdate(
+        req.params.id,
+        { $set: user },
+        { new: true } // Returns the modified document
+      );
+      res.status(201).json({ message: 'Success!' });
+    }
+  }),
+];
+
 // Handle DELETE an user
 exports.user_delete = [
+  verifyJWT,
   (req, res, next) => {
     console.log('DELETE received');
     next();
@@ -143,11 +188,11 @@ exports.user_delete = [
         res.status(204).end();
       } else {
         console.log('Record does not exist!');
-        res.status(500).json({ message: 'Record does not exist!' });
+        throw new CustomError(500, 'Record does not exist.');
       }
     } catch (error) {
       console.log('Deletion failed');
-      res.status(500).json(error);
+      throw new CustomError(500, error);
     }
   }),
 ];

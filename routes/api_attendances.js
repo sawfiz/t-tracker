@@ -18,7 +18,7 @@ router.post('/', attendance_api_controller.attendance_create_post);
 // router.put('/:id', attendance_api_controller.attendance_update);
 
 // DELETE request to delete attendance.
-// router.delete('/:id', attendance_api_controller.attendance_delete);
+router.delete('/:id', attendance_api_controller.attendance_delete);
 
 /* Parents requests */
 

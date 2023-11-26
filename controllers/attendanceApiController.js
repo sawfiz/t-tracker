@@ -92,9 +92,37 @@ exports.attendance_create_post = [
       date: req.body.date,
       venue: req.body.venue,
       coaches: req.body.coachList,
-      athletes: req.body.attendeeList,
+      attendances: req.body.attendeeList,
     });
     await attendance.save();
     res.status(201).json({ message: 'Success' });
+  }),
+];
+
+// Handle DELETE an attendance
+exports.attendance_delete = [
+  verifyJWT,
+  (req, res, next) => {
+    console.log('DELETE received');
+    next();
+  },
+  validateObjectId,
+  asyncHandler(async (req, res, next) => {
+    try {
+      const attendance = await Attendance.findById(req.params.id);
+
+      if (attendance) {
+        await Attendance.findByIdAndDelete(req.params.id);
+        // res.status(200).json({ message: 'DELETE is success!' });
+        // res.status(204).send();
+        res.status(204).end();
+      } else {
+        console.log('Record does not exist!');
+        throw new CustomError(500, "Record does not exist.")
+      }
+    } catch (error) {
+      console.log('Deletion failed');
+      throw new CustomError(500, error)
+    }
   }),
 ];

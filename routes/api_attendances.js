@@ -3,22 +3,22 @@ const router = express.Router();
 
 const attendance_api_controller = require('../controllers/attendanceApiController');
 
-/* Athlete requests */
-// GET request for list of all athletes
+/* attendance requests */
+// GET request for list of all attendances
 // !Make sure /all route is place before /:id
 router.get('/', attendance_api_controller.attendances_list);
 
-// GET request for one athlete.
-// router.get('/:id', athlete_api_controller.athlete_detail);
+// GET request for one attendance.
+router.get('/:id', attendance_api_controller.attendance_detail);
 
-// POST request for creating athlete.
+// POST request for creating attendance.
 router.post('/', attendance_api_controller.attendance_create_post);
 
-// PUT request to update athlete.
-// router.put('/:id', athlete_api_controller.athlete_update);
+// PUT request to update attendance.
+// router.put('/:id', attendance_api_controller.attendance_update);
 
-// DELETE request to delete athlete.
-// router.delete('/:id', athlete_api_controller.athlete_delete);
+// DELETE request to delete attendance.
+// router.delete('/:id', attendance_api_controller.attendance_delete);
 
 /* Parents requests */
 

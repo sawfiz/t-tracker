@@ -36,6 +36,25 @@ exports.attendances_list = [
 ];
 
 
+
+// Handle GET details of a specific attendance.
+exports.attendance_detail = [
+  validateObjectId,
+  verifyJWT,
+  asyncHandler(async (req, res, next) => {
+    // console.log(req);
+    const [attendance] = await Promise.all([
+      Attendance.findById(req.params.id).exec(),
+    ]);
+
+    if (attendance === null) {
+      throw new CustomError(404, 'attendance not found');
+    }
+
+    res.status(200).json({ attendance });
+  }),
+];
+
 // Handle POST to create an attendance
 exports.attendance_create_post = [
   (req, res, next) => {
@@ -70,7 +89,7 @@ exports.attendance_create_post = [
       date: req.body.date,
       venue: req.body.venue,
       coaches: req.body.coachList,
-      athletes: req.body.attendeeList,
+      attendances: req.body.attendeeList,
     });
     await attendance.save();
     res.status(201).json({ message: 'Success' });

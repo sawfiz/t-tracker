@@ -70,8 +70,16 @@ const validateInputs = () => {
 exports.users_list = [
   verifyJWT,
   asyncHandler(async (req, res, next) => {
+    const role = req.query.role;
+    let query = {}; // Define an empty query object
+
+    // If the 'role' query parameter exists, add it to the query object
+    if (role) {
+      query = { role }; // This assumes 'role' field exists in your User schema
+    }
+
     const users_list = await User.find(
-      {},
+      query,
       'first_name last_name username gender active'
     )
       .sort({ username: 1 })

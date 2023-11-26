@@ -14,6 +14,7 @@ const usersRouter = require('./routes/users');
 const dataRouter = require('./routes/data');
 const apiAthleteRouter = require('./routes/api_athletes');
 const apiUserRouter = require('./routes/api_users');
+const apiAttendanceRouter = require('./routes/api_attendances');
 
 // Utility modules
 const { connectToMongoDB } = require('./utils/mongooseConnection');
@@ -64,6 +65,7 @@ app.use('/users', usersRouter);
 app.use('/data', dataRouter);
 app.use('/api/athletes', apiAthleteRouter);
 app.use('/api/users', apiUserRouter);
+app.use('/api/attendances', apiAttendanceRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

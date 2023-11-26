@@ -44,7 +44,10 @@ exports.attendance_detail = [
   asyncHandler(async (req, res, next) => {
     // console.log(req);
     const [attendance] = await Promise.all([
-      Attendance.findById(req.params.id).exec(),
+      Attendance.findById(req.params.id)
+      .populate('coaches')
+      .populate('athletes')
+      .exec(),
     ]);
 
     if (attendance === null) {
@@ -89,7 +92,7 @@ exports.attendance_create_post = [
       date: req.body.date,
       venue: req.body.venue,
       coaches: req.body.coachList,
-      attendances: req.body.attendeeList,
+      athletes: req.body.attendeeList,
     });
     await attendance.save();
     res.status(201).json({ message: 'Success' });

@@ -1,6 +1,7 @@
 // Libraries
 const asyncHandler = require('express-async-handler');
 const { body, validationResult } = require('express-validator');
+const multer = require('multer');
 
 const validateObjectId = require('../middleware/validateObjectId');
 const { verifyJWT } = require('../middleware/verifyJWT');
@@ -8,6 +9,20 @@ const CustomError = require('../utils/CustomError');
 
 // Model
 const Athlete = require('../models/athlete');
+
+// Define the storage for the uploaded files
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, '/avatars'); // Specify the directory to save the uploaded files
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
+    cb(null, file.fieldname + '-' + uniqueSuffix)
+  }
+});
+
+// Initialize Multer with the defined storage
+const upload = multer({ storage: storage });
 
 const validateInputs = () => {
   return [
@@ -97,8 +112,11 @@ exports.athlete_detail = [
 
 // Handle POST to create an athlete
 exports.athlete_create_post = [
+  upload.single('avatar'),
   (req, res, next) => {
     console.log('POST received');
+    console.log(req.file);
+    console.log(req.body);
     next();
   },
   verifyJWT,
@@ -134,6 +152,7 @@ exports.athlete_create_post = [
       email: req.body.email,
       school: req.body.school,
       active: req.body.active,
+      photoUrl: req.file.path,
     });
     await athlete.save();
     res.status(201).json({ message: 'Success' });
@@ -195,11 +214,11 @@ exports.athlete_delete = [
         res.status(204).end();
       } else {
         console.log('Record does not exist!');
-        throw new CustomError(500, "Record does not exist.")
+        throw new CustomError(500, 'Record does not exist.');
       }
     } catch (error) {
       console.log('Deletion failed');
-      throw new CustomError(500, error)
+      throw new CustomError(500, error);
     }
   }),
 ];

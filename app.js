@@ -53,11 +53,13 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
 
 // Misc middleware
-app.use(logger('dev'));
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+// app.use(express.urlencoded({ extended: false }));
+app.use(logger('dev'));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+// Serve static files from the 'public' directory
+app.use('/public/avatars', express.static('public/avatars'));
 
 // Use routes
 app.use('/', indexRouter);
@@ -66,6 +68,8 @@ app.use('/data', dataRouter);
 app.use('/api/athletes', apiAthleteRouter);
 app.use('/api/users', apiUserRouter);
 app.use('/api/attendances', apiAttendanceRouter);
+
+// Move these behind so as not to conflict with multer
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

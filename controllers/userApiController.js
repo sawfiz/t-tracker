@@ -106,17 +106,18 @@ exports.user_detail = [
 
 // Handle POST to create an user
 exports.user_create_post = [
+  validateInputs(),
   asyncHandler(async (req, res, next) => {
     const validationErrors = validationResult(req);
 
-    if (!validationErrors.isEmpty())
+    if (!validationErrors.isEmpty()) {
       throw new CustomError(400, JSON.stringify(validationErrors));
+    }
 
     // Make sure username is not already used
     const userExists = await User.findOne({
       username: req.body.username,
     });
-    // if (userExists) res.status(409).json({ error: 'Username in use' });
     if (userExists) throw new CustomError(409, 'Athlete already exists');
 
     bcrypt.hash(req.body.password, 10, async (err, hashedPassword) => {

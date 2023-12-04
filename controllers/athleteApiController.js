@@ -66,7 +66,7 @@ exports.athletes_list = [
   asyncHandler(async (req, res, next) => {
     const athletes_list = await Athlete.find(
       {},
-      'first_name last_name gender active'
+      'first_name last_name gender active photoUrl'
     )
       .sort({ first_name: 1 })
       .maxTimeMS(5000) // Set the maximum time for query execution
@@ -110,14 +110,7 @@ exports.athlete_create_post = [
     const validationErrors = validationResult(req);
 
     if (!validationErrors.isEmpty()) {
-      try {
-        throw new CustomError(400, JSON.stringify(validationErrors));
-      } catch (err) {
-        console.log(
-          '🚀 ~ file: athleteApiController.js:115 ~ asyncHandler ~ err:',
-          err
-        );
-      }
+      throw new CustomError(400, JSON.stringify(validationErrors));
     }
     // Make sure username is not already used
     const userExists = await Athlete.findOne({
@@ -136,7 +129,7 @@ exports.athlete_create_post = [
       email: req.body.email,
       school: req.body.school,
       active: req.body.active,
-      photoUrl: req.file.path,
+      photoUrl: req.file ? req.file.path : null,
     });
     await athlete.save();
     res.status(201).json({ message: 'Success' });
@@ -168,7 +161,7 @@ exports.athlete_update = [
       email: req.body.email,
       school: req.body.school,
       active: req.body.active,
-      photoUrl: req.file.path,
+      photoUrl: req.file ? req.file.path : null,
       _id: req.params.id,
     });
 
